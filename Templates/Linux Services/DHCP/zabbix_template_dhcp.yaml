@@ -1,0 +1,108 @@
+zabbix_export:
+  version: '6.0'
+  date: '2022-08-22T18:25:39Z'
+  groups:
+    -
+      uuid: d0e8fe617e424ef6adca6d17a46a671b
+      name: TIMC
+    -
+      uuid: ad00ab9f4119448b8e8538788f70fc45
+      name: 'TIMC / DACTA2 / VMs / LINUX'
+    -
+      uuid: 8be4e6551a664e1095b7e2097896dbd9
+      name: 'TIMC / SERVIÇOS'
+  templates:
+    -
+      uuid: d82fe07826a74a1bb330539795ef89b4
+      template: 'ntn - LINUX DHCP SERVER v2'
+      name: '[NTN] - LINUX DHCP SERVER v2'
+      groups:
+        -
+          name: TIMC
+        -
+          name: 'TIMC / DACTA2 / VMs / LINUX'
+        -
+          name: 'TIMC / SERVIÇOS'
+      items:
+        -
+          uuid: 8e9db5dce10a4faa9421d054c375e8b1
+          name: 'DHCP Service Status'
+          key: 'dhcpstats[dhcpstatus]'
+          history: 7d
+          trends: 90d
+          valuemap:
+            name: 'Linux Script Return'
+          tags:
+            -
+              tag: Application
+              value: 'DHCP SERVICE'
+        -
+          uuid: ead71849de6a45e29b865e8c7aad14ad
+          name: 'Total used IPs'
+          key: 'networkstats[usototal]'
+          tags:
+            -
+              tag: Application
+              value: 'DHCP SERVICE'
+        -
+          uuid: aa95febc51814923a72981b6a42dfb6a
+          name: 'DHCP Processes'
+          key: 'proc.num[dhcpd]'
+          history: 1w
+          tags:
+            -
+              tag: Application
+              value: 'DHCP SERVICE'
+          triggers:
+            -
+              uuid: 69310cb0eb2647589ebb6e472c78e593
+              expression: 'last(/ntn - LINUX DHCP SERVER v2/proc.num[dhcpd])<=0'
+              name: 'DHCP service is stopped'
+              priority: HIGH
+      discovery_rules:
+        -
+          uuid: b4475c7116354e6bac41911b8e021440
+          name: 'DHCP NETWORKS DISCOVER'
+          key: dhcpnetworkdiscover
+          delay: 12h
+          item_prototypes:
+            -
+              uuid: 0226fbd7b6dc4fe2a4dde2159ac3e515
+              name: 'Used IPs: {#NETWORKNAME}'
+              key: 'dhcpstats[uso,{#NETWORKNAME}]'
+              tags:
+                -
+                  tag: Application
+                  value: 'DHCP SERVICE'
+            -
+              uuid: b14eaacdc7b44d09b2a7e71f55b8633e
+              name: 'Used IPs {#NETWORKNAME} (%)'
+              key: 'dhcpstats[usopercent,{#NETWORKNAME}]'
+              value_type: FLOAT
+              units: '%'
+              tags:
+                -
+                  tag: Application
+                  value: 'DHCP SERVICE'
+              trigger_prototypes:
+                -
+                  uuid: 4d8eef1600854dbb8b5481feae07084c
+                  expression: 'last(/ntn - LINUX DHCP SERVER v2/dhcpstats[usopercent,{#NETWORKNAME}])>70'
+                  name: '{#NETWORKNAME} 70% Used'
+                  priority: INFO
+                -
+                  uuid: 6d369d2022e846f9af37777c1022f39c
+                  expression: 'last(/ntn - LINUX DHCP SERVER v2/dhcpstats[usopercent,{#NETWORKNAME}])>90'
+                  name: '{#NETWORKNAME} 90% Used'
+                  priority: HIGH
+      valuemaps:
+        -
+          uuid: 6a0acd3d2c5545bdba7fc6f34c5e9cac
+          name: 'Linux Script Return'
+          mappings:
+            -
+              value: '0'
+              newvalue: Ok
+            -
+              value: '1'
+              newvalue: Error
