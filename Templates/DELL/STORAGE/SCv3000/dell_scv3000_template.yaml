@@ -1,0 +1,727 @@
+zabbix_export:
+  version: '6.0'
+  date: '2022-08-22T16:21:32Z'
+  groups:
+    -
+      uuid: d0e8fe617e424ef6adca6d17a46a671b
+      name: TIMC
+  templates:
+    -
+      uuid: 6b9e9e2d19234a3892cabbd97ef1e018
+      template: STORAGE-DELL-SCv3000
+      name: '[NTN] - DELL SCv3000'
+      description: 'Template para storage Dell modelo SCv3000'
+      groups:
+        -
+          name: TIMC
+      items:
+        -
+          uuid: 2d5df9a4457a46b39f7295a613af37b0
+          name: 'System Status'
+          type: SNMP_AGENT
+          snmp_oid: 'DELL-STORAGE-SC-MIB::productIDGlobalStatus.0'
+          key: productIDGlobalStatus
+          description: 'Current status of the product. This is a rollup for the entire product including any monitored devices. The status is intended to give initiative to an SNMP monitor to get further data when this status is abnormal.  The value here maps from the                      System Status icon on the SC GUI: grey->unknown, green->ok, yellow->noncritical, red->critical. If the productIDGlobalStatus is not ok then              scLastWorstAlert contains the scAlertNbr of the alert that is responsible for the       negative status.'
+          valuemap:
+            name: 'Dell Open Manage System Status'
+          tags:
+            -
+              tag: Application
+              value: General
+        -
+          uuid: d04bb40edcb145a5963f5da3ad965487
+          name: 'Service Tag'
+          type: SNMP_AGENT
+          snmp_oid: 'DELL-STORAGE-SC-MIB::scCtlrServiceTag.1'
+          key: scCtlrServiceTag
+          delay: 1h
+          trends: '0'
+          value_type: CHAR
+          description: 'Service Tag'
+      discovery_rules:
+        -
+          uuid: 13da123aa3c74cb69bfd02f7e386e0d2
+          name: 'FAN Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},DELL-STORAGE-SC-MIB::scCtlrFanName]'
+          key: scCtlrFanName
+          delay: 1h
+          item_prototypes:
+            -
+              uuid: f20e2d427e2b48fcb35d7a2395f4bd44
+              name: '{#SNMPVALUE}: Current RPM'
+              type: SNMP_AGENT
+              snmp_oid: 'DELL-STORAGE-SC-MIB::scCtlrFanCurrentRpm.{#SNMPINDEX}'
+              key: 'scCtlrFanCurrentRpm[{#SNMPVALUE}]'
+              tags:
+                -
+                  tag: Application
+                  value: FAN
+            -
+              uuid: 9eb89882603a49008d722d539b7a5635
+              name: '{#SNMPVALUE}: Status'
+              type: SNMP_AGENT
+              snmp_oid: 'DELL-STORAGE-SC-MIB::scCtlrFanStatus.{#SNMPINDEX}'
+              key: 'scCtlrFanStatus[{#SNMPVALUE}]'
+              valuemap:
+                name: 'DELL - SCSTATUS'
+              tags:
+                -
+                  tag: Application
+                  value: FAN
+              trigger_prototypes:
+                -
+                  uuid: e2553412706343ee86c05b27c0e4c883
+                  expression: 'last(/STORAGE-DELL-SCv3000/scCtlrFanStatus[{#SNMPVALUE}])<>1'
+                  name: 'Fan {#SNMPVALUE} Status Error'
+                  priority: WARNING
+        -
+          uuid: 939e3de1f7eb450f9c805f3a118f35c3
+          name: 'Controller Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},DELL-STORAGE-SC-MIB::scCtlrName]'
+          key: scCtlrName
+          delay: 1h
+          description: 'Dicovery of Controllers'
+          item_prototypes:
+            -
+              uuid: 7690ae921c214b789555a875c19b0b88
+              name: 'Controller {#SNMPVALUE}: Status'
+              type: SNMP_AGENT
+              snmp_oid: 'DELL-STORAGE-SC-MIB::scCtlrStatus.{#SNMPINDEX}'
+              key: 'scCtlrStatus[{#SNMPVALUE}]'
+              valuemap:
+                name: 'DELL - SCSTATUS'
+              tags:
+                -
+                  tag: Application
+                  value: Controller
+              trigger_prototypes:
+                -
+                  uuid: fdb71e3ddda840acb453f5f2ef2f651f
+                  expression: 'last(/STORAGE-DELL-SCv3000/scCtlrStatus[{#SNMPVALUE}])<>1'
+                  name: 'Controller {#SNMPVALUE} Status Error'
+                  priority: WARNING
+        -
+          uuid: c4d393d1820f412eaf38749ef6342adf
+          name: 'Power Supply Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},DELL-STORAGE-SC-MIB::scCtlrPowerNbr]'
+          key: scCtlrPowerNbr
+          delay: 1h
+          item_prototypes:
+            -
+              uuid: 9c5c341d00ed4788907dea9573626f09
+              name: 'Power Supply {#SNMPVALUE}: Status'
+              type: SNMP_AGENT
+              snmp_oid: 'DELL-STORAGE-SC-MIB::scCtlrPowerStatus.{#SNMPINDEX}'
+              key: 'scCtlrPowerStatus[{#SNMPVALUE}]'
+              delay: 5m
+              valuemap:
+                name: 'DELL - SCSTATUS'
+              tags:
+                -
+                  tag: Application
+                  value: 'Power Supply'
+              trigger_prototypes:
+                -
+                  uuid: 6e3cde50d92548588294ebd71d096c34
+                  expression: 'last(/STORAGE-DELL-SCv3000/scCtlrPowerStatus[{#SNMPVALUE}])<>1'
+                  name: 'Power Supply {#SNMPVALUE}: Status'
+                  priority: WARNING
+        -
+          uuid: 10faa5ee2e714e6bbfebe33b66f69ee8
+          name: 'Temperature Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},DELL-STORAGE-SC-MIB::scCtlrTempName]'
+          key: scCtlrTempName
+          delay: 1h
+          item_prototypes:
+            -
+              uuid: a3a703490cfe49609ad2a61f6146619a
+              name: 'Temperature {#SNMPVALUE}: Current'
+              type: SNMP_AGENT
+              snmp_oid: 'DELL-STORAGE-SC-MIB::scCtlrTempCurrentC.{#SNMPINDEX}'
+              key: 'scCtlrTempCurrentC[{#SNMPINDEX}]'
+              delay: 5m
+              tags:
+                -
+                  tag: Application
+                  value: Temperature
+            -
+              uuid: 70f1f7e42f75458eb3ff3f4179f8a9e4
+              name: 'Temperature {#SNMPVALUE}: Status'
+              type: SNMP_AGENT
+              snmp_oid: 'DELL-STORAGE-SC-MIB::scCtlrTempStatus.{#SNMPINDEX}'
+              key: 'scCtlrTempStatus[{#SNMPINDEX}]'
+              delay: 5m
+              valuemap:
+                name: 'DELL - SCSTATUS'
+              tags:
+                -
+                  tag: Application
+                  value: Temperature
+              trigger_prototypes:
+                -
+                  uuid: efb7ed251b3748f0acf50b67d0579ca5
+                  expression: 'last(/STORAGE-DELL-SCv3000/scCtlrTempStatus[{#SNMPINDEX}])<>1'
+                  name: 'Temperature {#SNMPVALUE}: Status'
+                  priority: WARNING
+        -
+          uuid: e4d95875e7ee4d9ca4580e592556dbb9
+          name: 'Disk Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},DELL-STORAGE-SC-MIB::scDiskNamePosition]'
+          key: scDiskNamePosition
+          delay: 1h
+          description: 'Dicovery of disks'
+          item_prototypes:
+            -
+              uuid: 6e763e265dde438683170cbdbc050482
+              name: 'Disk {#SNMPVALUE}: Model'
+              type: SNMP_AGENT
+              snmp_oid: 'DELL-STORAGE-SC-MIB::scDiskConfigProduct.{#SNMPINDEX}'
+              key: 'scDiskConfigProduct[{#SNMPVALUE}]'
+              delay: 1h
+              trends: '0'
+              value_type: CHAR
+              description: 'Model of disk'
+              tags:
+                -
+                  tag: Application
+                  value: Disk
+            -
+              uuid: b36ffeb9018d4778888de9628e257047
+              name: 'Disk {#SNMPVALUE}: Serial'
+              type: SNMP_AGENT
+              snmp_oid: 'DELL-STORAGE-SC-MIB::scDiskConfigSerial.{#SNMPINDEX}'
+              key: 'scDiskConfigSerial[{#SNMPVALUE}]'
+              delay: 1h
+              trends: '0'
+              value_type: CHAR
+              tags:
+                -
+                  tag: Application
+                  value: Disk
+            -
+              uuid: 3e678b78beab4c4e916e7a77205fd2bf
+              name: 'Disk {#SNMPVALUE}: Status'
+              type: SNMP_AGENT
+              snmp_oid: 'DELL-STORAGE-SC-MIB::scDiskStatus.{#SNMPINDEX}'
+              key: 'scDiskStatus[{#SNMPVALUE}]'
+              delay: 5m
+              valuemap:
+                name: 'DELL - SCSTATUS'
+              tags:
+                -
+                  tag: Application
+                  value: Disk
+              trigger_prototypes:
+                -
+                  uuid: 5826f37c1562412b8f631f19e775a251
+                  expression: 'last(/STORAGE-DELL-SCv3000/scDiskStatus[{#SNMPVALUE}])<>1'
+                  name: 'Disk {#SNMPVALUE} Status Error'
+                  priority: WARNING
+        -
+          uuid: a2b80e96d07b4fb3b03cf52841e2b0b3
+          name: 'Enclosure Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},DELL-STORAGE-SC-MIB::scEnclName]'
+          key: scEnclName
+          delay: 1h
+          description: 'Dicovery of Enclosure'
+          item_prototypes:
+            -
+              uuid: 8afa917814f444109b71f615fea17828
+              name: 'Enclosure {#SNMPVALUE}: Status'
+              type: SNMP_AGENT
+              snmp_oid: 'DELL-STORAGE-SC-MIB::scEnclStatus.{#SNMPINDEX}'
+              key: 'scEnclStatus[{#SNMPVALUE}]'
+              valuemap:
+                name: 'DELL - SCSTATUS'
+              tags:
+                -
+                  tag: Application
+                  value: Enclosure
+              trigger_prototypes:
+                -
+                  uuid: 8aad6c3d361e4596bb5b125eb04c20be
+                  expression: 'last(/STORAGE-DELL-SCv3000/scEnclStatus[{#SNMPVALUE}])<>1'
+                  name: 'Enclosure {#SNMPVALUE} Status Error'
+                  priority: WARNING
+        -
+          uuid: 1be2622add8b4d2887392d99a1b4a85e
+          name: '[HTTP] - Storage Servers Discovery'
+          type: HTTP_AGENT
+          key: ServerList
+          delay: 1h
+          authtype: BASIC
+          username: '{$API.USERNAME}'
+          password: '{$API.PASSWORD}'
+          item_prototypes:
+            -
+              uuid: cdd45c139744422c8b564dce60716e99
+              name: 'Server {#SERVERNAME} - Read IOPs'
+              type: DEPENDENT
+              key: 'readIops[{#SERVERNAME}]'
+              delay: '0'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $..readIops
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - ']'
+                    - ''
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - '['
+                    - ''
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'ServerGetStats[{#SERVERID}]'
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storage Server Performance'
+            -
+              uuid: fafdae9d1c564b6c8cd99116d05d544d
+              name: 'Server {#SERVERNAME} - Read/s'
+              type: DEPENDENT
+              key: 'readKbPerSecond[{#SERVERNAME}]'
+              delay: '0'
+              units: Bps
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $..readKbPerSecond
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - ']'
+                    - ''
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - '['
+                    - ''
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '1024'
+              master_item:
+                key: 'ServerGetStats[{#SERVERID}]'
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storage Server Performance'
+            -
+              uuid: 5c77bde264424670b7cd43c0094ac915
+              name: 'Server {#SERVERNAME} - Read Latency (microseconds)'
+              type: DEPENDENT
+              key: 'readLatency[{#SERVERNAME}]'
+              delay: '0'
+              status: DISABLED
+              discover: NO_DISCOVER
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $..readLatency
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - ']'
+                    - ''
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - '['
+                    - ''
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'ServerGetStats[{#SERVERID}]'
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storage Server Performance'
+            -
+              uuid: 923fcb5a9668401e8bb926bcf8de384b
+              name: '{#SERVERNAME} - GetStats'
+              type: HTTP_AGENT
+              key: 'ServerGetStats[{#SERVERID}]'
+              history: '0'
+              trends: '0'
+              value_type: CHAR
+              authtype: BASIC
+              username: '{$API.USERNAME}'
+              password: '{$API.PASSWORD}'
+              url: 'https://{$STORAGE.IP}:3033/api/rest/StorageCenter/ScServerIoUsage/GetFilter'
+              posts: |
+                {
+                "HistoricalFilter":{
+                "FilterTime": "other",
+                "MaxCountReturn": 5,
+                "UseCurrent": true,
+                "UseEndOfDay": true,
+                "UseStartOfDay": true
+                },
+                "ObjectInstanceId":"{#SERVERID}"
+                }
+              post_type: JSON
+              request_method: POST
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storage Server Performance'
+            -
+              uuid: 8d16f8e7c18f44cab18717d55b863807
+              name: 'Server {#SERVERNAME} - Write IOPs'
+              type: DEPENDENT
+              key: 'writeIops[{#SERVERNAME}]'
+              delay: '0'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $..writeIops
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - ']'
+                    - ''
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - '['
+                    - ''
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'ServerGetStats[{#SERVERID}]'
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storage Server Performance'
+            -
+              uuid: 61809a1a38bd4a1b92043e5c6a553d17
+              name: 'Server {#SERVERNAME} - Write/s'
+              type: DEPENDENT
+              key: 'writeKbPerSecond[{#SERVERNAME}]'
+              delay: '0'
+              units: Bps
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $..writeKbPerSecond
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - ']'
+                    - ''
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - '['
+                    - ''
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '1024'
+              master_item:
+                key: 'ServerGetStats[{#SERVERID}]'
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storage Server Performance'
+            -
+              uuid: 2648f4429c96469c871a030d8bba5fc1
+              name: 'Server {#SERVERNAME} - Write Latency (microseconds)'
+              type: DEPENDENT
+              key: 'writeLatency[{#SERVERNAME}]'
+              delay: '0'
+              status: DISABLED
+              discover: NO_DISCOVER
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $..writeLatency
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - ']'
+                    - ''
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - '['
+                    - ''
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'ServerGetStats[{#SERVERID}]'
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storage Server Performance'
+          url: 'https://{$STORAGE.IP}:3033/api/rest/StorageCenter/StorageCenter/{$STORAGE.ID}/ServerList'
+          lld_macro_paths:
+            -
+              lld_macro: '{#SERVERNAME}'
+              path: $.instanceName
+            -
+              lld_macro: '{#SERVERID}'
+              path: $.instanceId
+        -
+          uuid: 31e4f03272784856a0a00150d5950817
+          name: '[HTTP] - Storage Volume Folder Discovery'
+          type: HTTP_AGENT
+          key: VolumeFolderList
+          delay: 1h
+          authtype: BASIC
+          username: '{$API.USERNAME}'
+          password: '{$API.PASSWORD}'
+          item_prototypes:
+            -
+              uuid: 3b4738c45cc04c159cc31d945fce43b1
+              name: 'Volume Folder {#INSTANCENAME} - Read IOPs'
+              type: DEPENDENT
+              key: 'readIops[{#INSTANCENAME}]'
+              delay: '0'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $..readIops
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - ']'
+                    - ''
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - '['
+                    - ''
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'ScVolumeFolderIoUsage[{#INSTANCEID}]'
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storge Volume Performance'
+            -
+              uuid: bb6405a9938c447496d238c6b0bd0fcd
+              name: 'Volume Folder {#INSTANCENAME} - Read/s'
+              type: DEPENDENT
+              key: 'readKbPerSecond[{#INSTANCENAME}]'
+              delay: '0'
+              units: Bps
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $..readKbPerSecond
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - ']'
+                    - ''
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - '['
+                    - ''
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '1024'
+              master_item:
+                key: 'ScVolumeFolderIoUsage[{#INSTANCEID}]'
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storge Volume Performance'
+            -
+              uuid: 0f0fded8f1a8454da3f3afa1b1fd23ed
+              name: '{#INSTANCENAME} - GetStats'
+              type: HTTP_AGENT
+              key: 'ScVolumeFolderIoUsage[{#INSTANCEID}]'
+              trends: '0'
+              value_type: TEXT
+              authtype: BASIC
+              username: '{$API.USERNAME}'
+              password: '{$API.PASSWORD}'
+              url: 'https://{$STORAGE.IP}:3033/api/rest/StorageCenter/ScVolumeFolderIoUsage/GetFilter'
+              posts: |
+                {
+                "HistoricalFilter":{
+                "FilterTime": "other",
+                "MaxCountReturn": 5,
+                "UseCurrent": true,
+                "UseEndOfDay": true,
+                "UseStartOfDay": true
+                },
+                "ObjectInstanceId":"{#INSTANCEID}"
+                }
+              post_type: JSON
+              request_method: POST
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storge Volume Performance'
+            -
+              uuid: 312f46664dc64dc9b1dbffed9f32b7e6
+              name: 'Volume Folder {#INSTANCENAME} - Write IOPs'
+              type: DEPENDENT
+              key: 'writeIops[{#INSTANCENAME}]'
+              delay: '0'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $..writeIops
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - ']'
+                    - ''
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - '['
+                    - ''
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'ScVolumeFolderIoUsage[{#INSTANCEID}]'
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storge Volume Performance'
+            -
+              uuid: e1ae82d9c5df47cc8f69226b7f79ed68
+              name: 'Volume Folder {#INSTANCENAME} - Write/s'
+              type: DEPENDENT
+              key: 'writeKbPerSecond[{#INSTANCENAME}]'
+              delay: '0'
+              units: Bps
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $..writeKbPerSecond
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - ']'
+                    - ''
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - '['
+                    - ''
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '1024'
+              master_item:
+                key: 'ScVolumeFolderIoUsage[{#INSTANCEID}]'
+              tags:
+                -
+                  tag: Tipo
+                  value: 'Storge Volume Performance'
+          url: 'https://{$STORAGE.IP}:3033/api/rest/StorageCenter/ScVolumeFolder/'
+          lld_macro_paths:
+            -
+              lld_macro: '{#INSTANCEID}'
+              path: $.instanceId
+            -
+              lld_macro: '{#INSTANCENAME}'
+              path: $.instanceName
+      macros:
+        -
+          macro: '{$API.PASSWORD}'
+          value: Monitoring_Password
+        -
+          macro: '{$API.USERNAME}'
+          value: Monitor
+        -
+          macro: '{$STORAGE.ID}'
+          value: '11111'
+        -
+          macro: '{$STORAGE.IP}'
+          value: 172.16.0.1
+      valuemaps:
+        -
+          uuid: 6cb560a392eb4d7dafee6570197a8db3
+          name: 'DELL - SCSTATUS'
+          mappings:
+            -
+              value: '1'
+              newvalue: Up
+            -
+              value: '2'
+              newvalue: Down
+            -
+              value: '3'
+              newvalue: Degraded
+        -
+          uuid: fe1b64548cc54aba81f12ed0874f3681
+          name: 'Dell Open Manage System Status'
+          mappings:
+            -
+              value: '1'
+              newvalue: Other
+            -
+              value: '2'
+              newvalue: Unknown
+            -
+              value: '3'
+              newvalue: OK
+            -
+              value: '4'
+              newvalue: NonCritical
+            -
+              value: '5'
+              newvalue: Critical
+            -
+              value: '6'
+              newvalue: NonRecoverable
