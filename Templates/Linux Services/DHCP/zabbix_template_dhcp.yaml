@@ -4,13 +4,13 @@ zabbix_export:
   groups:
     -
       uuid: d0e8fe617e424ef6adca6d17a46a671b
-      name: TIMC
+      name: LINUX
     -
       uuid: ad00ab9f4119448b8e8538788f70fc45
-      name: 'TIMC / DACTA2 / VMs / LINUX'
+      name: 'LINUX'
     -
       uuid: 8be4e6551a664e1095b7e2097896dbd9
-      name: 'TIMC / SERVIÇOS'
+      name: 'LINUX / SERVIÇOS'
   templates:
     -
       uuid: d82fe07826a74a1bb330539795ef89b4
@@ -18,11 +18,11 @@ zabbix_export:
       name: '[NTN] - LINUX DHCP SERVER v2'
       groups:
         -
-          name: TIMC
+          name: LINUX
         -
-          name: 'TIMC / DACTA2 / VMs / LINUX'
+          name: 'LINUX'
         -
-          name: 'TIMC / SERVIÇOS'
+          name: 'LINUX / SERVIÇOS'
       items:
         -
           uuid: 8e9db5dce10a4faa9421d054c375e8b1
